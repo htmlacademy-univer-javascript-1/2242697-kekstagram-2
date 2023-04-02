@@ -1,3 +1,5 @@
-import './generate-photo.js';
-import './generate-comment.js';
-import './create-photo-elements.js';
+import {generateDescriptions} from './data.js';
+import './miniatures.js';
+import './bigPhoto';
+
+generateDescriptions();
