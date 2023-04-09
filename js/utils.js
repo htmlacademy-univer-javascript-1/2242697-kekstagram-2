@@ -1,30 +1,15 @@
-function createRandomIdFromRangeGenerator (min, max) {
-  const previousValues = [];
+const getRandomInteger = (min, max) => {
+  if (min < 0 || max < 0 || min === max) {
+    return -1;
+  }
+  if (max < min){
+    [max, min] = [min, max];
+  }
+  return Math.ceil(min) + Math.floor(Math.random() * (Math.floor(max) + 1 - Math.ceil(min)));
+};
 
-  return function () {
-    let currentValue = getRandomInteger(min, max);
-    if (previousValues.length >= (max - min + 1)) {
-      return null;
-    }
-    while (previousValues.includes(currentValue)) {
-      currentValue = getRandomInteger(min, max);
-    }
-    previousValues.push(currentValue);
-    return currentValue;
-  };
-}
+const getLineLength = (line, maxLength) => line.length <= maxLength;
 
-function getRandomInteger (min, max) {
-  const lower = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
-  const upper = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
-  const result = Math.random() * (upper - lower + 1) + lower;
+const isEscapeKey = (event) => event.key === 'Escape';
 
-  return Math.floor(result);
-}
-
-const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
-
-const isEscapeKey = (evt) => evt.key === 'Escape';
-const isEnterKey = (evt) => evt.key === 'Enter';
-
-export {createRandomIdFromRangeGenerator, getRandomArrayElement, getRandomInteger, isEscapeKey, isEnterKey};
+export {getRandomInteger, getLineLength, isEscapeKey};

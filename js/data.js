@@ -40,31 +40,33 @@ const DESCRIPTIONS = [
   'Это я на улице , сейчас дома уже',
   'Это я  размазан , сейчас дома уже',
 ];
-const generatePhotoId = createRandomIdFromRangeGenerator(MIN_PHOTO_ID_COUNT, MAX_PHOTO_ID_COUNT);
-const generatePhotoUrl = createRandomIdFromRangeGenerator(MIN_PHOTO_URL_COUNT, MAX_PHOTO_URL_COUNT);
-const generateLikesCount = createRandomIdFromRangeGenerator(MIN_LIKES_COUNT, MAX_LIKES_COUNT);
-const generateCommentId = createRandomIdFromRangeGenerator(MIN_COMMENTS_ID_COUNT, MAX_COMMENTS_ID_COUNT);
-const generateCommentAvatarUrl = () => getRandomInteger(MIN_AVATAR_COMMENTS_URL_COUNT, MAX_AVATAR_COMMENTS_URL_COUNT);
+const arrayObjects = [];
 
-const createMessage = () =>
-  Array.from({ length: getRandomInteger(1, 2) }, () =>
-    getRandomArrayElement(COMMENTS)).join(' ');
+const commentsArray = (count) => {
+  const array = [];
+  for(let i = 0; i < count; i++){
+    array.push({
+      id: i,
+      avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
+      message: MESSAGES[getRandomInteger(0, MESSAGES.length - 1)],
+      name: NAME[getRandomInteger(0, NAME.length - 1)]
+    });
+  }
+  return array;
+};
 
-const createComment = () => ({
-  id: generateCommentId(),
-  avatar: `img/avatar-${generateCommentAvatarUrl()}.svg`,
-  message: createMessage(),
-  name: getRandomArrayElement(NAMES),
-});
+const addPhotos = () =>{
+  for(let i = 0; i < COUNT_OF_OBJECTS; i++){
+    arrayObjects.push({
+      id: i,
+      url: `photos/${i + 1}.jpg`,
+      description: DESCRIPTIONS[getRandomInteger(0, DESCRIPTIONS.length - 1)],
+      likes: getRandomInteger(15, 200),
+      comments: commentsArray(getRandomInteger(0, 20))
+    });
+  }
+};
 
-const createPhotoDescription = () => ({
-  id: generatePhotoId(),
-  url: `photos/${generatePhotoUrl()}.jpg`,
-  description: getRandomArrayElement(DESCRIPTIONS),
-  likes: generateLikesCount(),
-  comments: Array.from({length: getRandomInteger(MIN_COMMENTS_COUNT, MAX_COMMENTS_COUNT)}, createComment)
-});
+addPhotos();
 
-const getPhotoDescriptions = () => Array.from({length: SIMILAR_PHOTO_DESCRIPTIONS_COUNT}, createPhotoDescription);
-
-export {getPhotoDescriptions};
+export{arrayObjects};

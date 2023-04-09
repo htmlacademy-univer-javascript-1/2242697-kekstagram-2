@@ -1,7 +1,6 @@
-import {getPhotoDescriptions} from './data.js';
-import {drawPhotos} from './thumbnail.js';
+import './util.js';
+import {arrayObjects} from './data.js';
+import {createThumbnails} from './thumbnails.js';
 import './form.js';
 
-
-const photoDescriptions = getPhotoDescriptions();
-drawPhotos(photoDescriptions);
+createThumbnails(arrayObjects);
