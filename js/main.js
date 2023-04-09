@@ -1,5 +1,7 @@
-import {generateDescriptions} from './data.js';
-import './miniatures.js';
-import './bigPhoto';
+import {getPhotoDescriptions} from './data.js';
+import {drawPhotos} from './thumbnail.js';
+import './form.js';
 
-generateDescriptions();
+
+const photoDescriptions = getPhotoDescriptions();
+drawPhotos(photoDescriptions);
