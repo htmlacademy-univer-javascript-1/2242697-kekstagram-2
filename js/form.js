@@ -1,80 +1,73 @@
 import {isEscapeKey} from './util.js';
 
-const MAX_HASHTAG_COUNT = 5;
-const VALID_SYMBOLS = /^#[a-zа-яё0-9]{1,19}$/i;
-const TAG_ERROR_TEXT = 'Неправильно заполнены хештеги!';
+const TAG_REGEX = /^#[A-Za-zА-Яа-яЕё0-9]{1,19}$/i;
+const MAX_TAGS_NUMBER = 5;
 
-const uploadOverlay = document.querySelector('.img-upload__overlay');
-const fileUpload = document.querySelector('#upload-file');
-const form = document.querySelector('.img-upload__form');
-const hashtagField = document.querySelector('.text__hashtags');
-const commentField = document.querySelector('.text__description');
-const cancelButton = document.querySelector('.img-upload__cancel');
-
-const pristine = new Pristine(form, {
+const imgUploadForm = document.querySelector('.img-upload__form');
+const uploadFile = document.querySelector('#upload-file');
+const imgUploadOverlay = document.querySelector('.img-upload__overlay');
+const uploadCancel = document.querySelector('#upload-cancel');
+const textHashtags = document.querySelector('.text__hashtags');
+const textDescription = document.querySelector('.text__description');
+const pristine = new Pristine(imgUploadForm, {
   classTo: 'img-upload__field-wrapper',
-  errorTextParent:  'img-upload__field-wrapper',
+  errorTextParent: 'img-upload__field-wrapper',
+  errorTextClass: 'img-upload__error-text'
 });
 
-const showUploadModal = () => {
-  uploadOverlay.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-  document.addEventListener('keydown', onDocumentKeydown);
-};
+const getHashtags = (value) => value.toLowerCase().trim().split(/\s+/);
 
-const closeUploadModal = () => {
-  form.reset();
-  uploadOverlay.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-  document.removeEventListener('keydown', onDocumentKeydown);
-};
+pristine.addValidator(textHashtags, (value) => {
+  if (value !== '') {
+    const hashTagsArray = getHashtags(value);
+    const hashTagsSet = new Set(hashTagsArray);
 
-const isFieldFocused = () =>
-  document.activeElement === hashtagField ||
-  document.activeElement === commentField;
-
-function onDocumentKeydown(evt) {
-  if(isEscapeKey(evt) && !isFieldFocused()) {
-    evt.preventDefault();
-    closeUploadModal();
+    if (hashTagsSet.size !== hashTagsArray.length) {
+      return false;
+    }
   }
-}
+  return true;
+}, 'Хештеги регистронезависимы и не должны повторяться');
 
-const onCancelButtonClick = () => {
-  closeUploadModal();
+pristine.addValidator(textHashtags, (value) => {
+  if (value !== '') {
+    const hashTagsArray = getHashtags(value);
+
+    if (hashTagsArray.length > MAX_TAGS_NUMBER) {
+      return false;
+    }
+  }
+  return true;
+}, `Максимальное число хештегов - ${MAX_TAGS_NUMBER}`);
+
+pristine.addValidator(textHashtags, (value) => {
+  if (value === '') {
+    return true;
+  }
+
+  const hashTagsArray = getHashtags(value);
+  return hashTagsArray.every((hashtag) => TAG_REGEX.test(hashtag));
+}, 'Один из введённых вами хештегов некорректен');
+
+const closeUploadFileForm = (e) => {
+  if ((isEscapeKey(e) && document.activeElement !== textHashtags && document.activeElement !== textDescription) || e.type === 'click') {
+    imgUploadOverlay.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', closeUploadFileForm);
+    uploadCancel.removeEventListener('click', closeUploadFileForm);
+    imgUploadForm.reset();
+  }
 };
 
-const onFileInputChange = () => {
-  showUploadModal();
-};
+uploadFile.addEventListener('change', () => {
+  imgUploadOverlay.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', closeUploadFileForm);
+  uploadCancel.addEventListener('click', closeUploadFileForm);
+});
 
-const isValidTags = (tag) => VALID_SYMBOLS.test(tag);
-const hasValidCount = (tags) => tags.length <= MAX_HASHTAG_COUNT;
-const hasUniqueTags = (tags) => {
-  const lowerCaseTags = tags.map((tag) => tag.toLowerCase());
-  return lowerCaseTags.length === new Set(lowerCaseTags).size;
-};
-
-
-const validateTags = (value) => {
-  const tags = value
-    .trim()
-    .split(' ')
-    .filter((tag) => tag.trim().length);
-  return hasValidCount(tags) && hasUniqueTags(tags) && tags.every(isValidTags);
-};
-
-pristine.addValidator(
-  hashtagField,
-  validateTags,
-  TAG_ERROR_TEXT
-);
-
-const onSubmit = (evt) => {
-  evt.preventDefault();
-  pristine.validate();
-};
-
-fileUpload.addEventListener('change', onFileInputChange);
-cancelButton.addEventListener('click', onCancelButtonClick);
-form.addEventListener('submit', onSubmit);
+imgUploadForm.addEventListener('submit', (e) => {
+  if (!pristine.validate()) {
+    e.preventDefault();
+  }
+});
