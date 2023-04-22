@@ -46,7 +46,4 @@ const thumbnailClickHandler = (data) => {
   });
 };
 
-export {
-  thumbnailClickHandler,
-  closeModal
-};
+export {thumbnailClickHandler, closeModal};
