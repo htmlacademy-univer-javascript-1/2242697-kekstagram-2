@@ -1,14 +1,4 @@
-const getRandomInteger = (min, max) => {
-  if (min < 0 || max < 0 || min === max) {
-    return -1;
-  }
-  if (max < min){
-    [max, min] = [min, max];
-  }
-  return Math.ceil(min) + Math.floor(Math.random() * (Math.floor(max) + 1 - Math.ceil(min)));
-};
-
-const getLineLength = (line, maxLength) => line.length <= maxLength;
+const ERROR_MESSAGE_DURATION = 5000;
 
 const isEscapeKey = (event) => event.key === 'Escape';
 
@@ -36,6 +26,9 @@ const throttle = (callback, delayBetweenFrames) => {
 };
 
 const shuffleArray = (array) => {
+  const randomPicturesCount = 10;
+  const picturesCount = 25;
+
   let currentIndex = array.length;
   let randomIndex;
 
@@ -44,17 +37,32 @@ const shuffleArray = (array) => {
     currentIndex--;
     [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
   }
-  for(let i = 0; i < 15; i++){
+  for(let i = 0; i < picturesCount - randomPicturesCount; i++){
     array.pop();
   }
   return array;
 };
 
+const showAlert = () => {
+  const alertContainer = document.createElement('div');
+  alertContainer.style.zIndex = '100';
+  alertContainer.style.position = 'absolute';
+  alertContainer.style.left = '0';
+  alertContainer.style.top = '0';
+  alertContainer.style.right = '0';
+  alertContainer.style.padding = '20px 3px';
+  alertContainer.style.fontSize = '30px';
+  alertContainer.style.textAlign = 'center';
+  alertContainer.style.backgroundColor = '#ff4040';
+  alertContainer.textContent = 'Не удалось загрузить фотографии с сервера';
+  document.body.append(alertContainer);
+  setTimeout(() => alertContainer.remove(), ERROR_MESSAGE_DURATION);
+};
+
 export {
-  getRandomInteger,
   isEscapeKey,
   debounce,
   throttle,
   shuffleArray,
-  getLineLength
+  showAlert
 };
