@@ -1,8 +1,9 @@
 import {isEscapeKey} from './util.js';
-import {checkIfHashtagsRepeated, checkMaxHashtagsCount, checkIfHashtagCorrect, MAX_TAGS_NUMBER} from './validators.js';
+import {checkIfHashtagsRepeated, checkMaxHashtagsCount, checkIfHashtagCorrect, MAX_TAGS_NUMBER, checkFileType} from './validators.js';
 import {smartSlider} from './slider.js';
 import {scaleImage} from './scale-image.js';
 import {sendData} from './api.js';
+import {showError} from './alerts.js';
 
 const imgUploadForm = document.querySelector('.img-upload__form');
 const uploadFile = document.querySelector('#upload-file');
@@ -10,11 +11,6 @@ const imgUploadOverlay = document.querySelector('.img-upload__overlay');
 const uploadCancel = document.querySelector('#upload-cancel');
 const textHashtags = document.querySelector('.text__hashtags');
 const textDescription = document.querySelector('.text__description');
-const pristine = new Pristine(imgUploadForm, {
-  classTo: 'img-upload__field-wrapper',
-  errorTextParent: 'img-upload__field-wrapper',
-  errorTextClass: 'img-upload__error-text'
-});
 const scaleControlSmaller = document.querySelector('.scale__control--smaller');
 const scaleControlBigger = document.querySelector('.scale__control--bigger');
 const scaleControlValue = document.querySelector('.scale__control--value');
@@ -23,6 +19,11 @@ const effectsList = document.querySelector('.effects__list');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
 const imgUploadSubmit = document.querySelector('.img-upload__submit');
+const pristine = new Pristine(imgUploadForm, {
+  classTo: 'img-upload__field-wrapper',
+  errorTextParent: 'img-upload__field-wrapper',
+  errorTextClass: 'img-upload__error-text'
+});
 
 const smartSliderFilters = smartSlider('none', effectLevelSlider, effectLevelValue);
 const scaleUploadImage = scaleImage(scaleControlValue, imgPreview);
@@ -54,11 +55,19 @@ const closeUploadFileForm = (e = null, clear = true) => {
   }
 };
 
-uploadFile.addEventListener('change', () => {
-  imgUploadOverlay.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-  document.addEventListener('keydown', closeUploadFileForm);
-  uploadCancel.addEventListener('click', closeUploadFileForm);
+uploadFile.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const isCorrectFileType = checkFileType(file);
+
+  if (isCorrectFileType) {
+    imgPreview.src = URL.createObjectURL(file);
+    imgUploadOverlay.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    document.addEventListener('keydown', closeUploadFileForm);
+    uploadCancel.addEventListener('click', closeUploadFileForm);
+  } else {
+    showError();
+  }
 });
 
 const blockSubmitButton = () => {
@@ -82,13 +91,9 @@ const setUserFormSubmit = (onSuccess, onError) => {
         () => {
           onSuccess();
           unblockSubmitButton();
-
-          // scaleUploadImage.init();
-          // applyChanges('none');
         },
         () => {
           onError();
-          // showAlert('Не удалось отправить форму. Попробуйте ещё раз');
           unblockSubmitButton();
         },
         new FormData(imgUploadForm)
