@@ -12,4 +12,49 @@ const getLineLength = (line, maxLength) => line.length <= maxLength;
 
 const isEscapeKey = (event) => event.key === 'Escape';
 
-export {getRandomInteger, getLineLength, isEscapeKey};
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+
+  return (...rest) => {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
+const throttle = (callback, delayBetweenFrames) => {
+  let lastTime = 0;
+
+  return (...rest) => {
+    const now = new Date();
+
+    if (now - lastTime >= delayBetweenFrames) {
+      callback.apply(this, rest);
+      lastTime = now;
+    }
+  };
+};
+
+const shuffleArray = (array) => {
+  let currentIndex = array.length;
+  let randomIndex;
+
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  for(let i = 0; i < 15; i++){
+    array.pop();
+  }
+  return array;
+};
+
+export {
+  getRandomInteger,
+  isEscapeKey,
+  debounce,
+  throttle,
+  shuffleArray,
+  getLineLength
+};
